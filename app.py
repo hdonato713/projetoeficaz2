@@ -52,6 +52,41 @@ def listar_imoveis():
 
     return {"imoveis": imoveis}, 200
 
+@app.route("/imoveis/<int:imovel_id>", methods=["GET"])
+def buscar_imovel_por_id(imovel_id):
+    conn = connect_db()
+
+    if conn is None:
+        return {"erro": "Erro ao conectar ao banco de dados"}, 500
+
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT * FROM imoveis WHERE id = %s",
+        (imovel_id,),
+    )
+    resultado = cursor.fetchone()
+
+    if resultado is None:
+        cursor.close()
+        conn.close()
+        return {"erro": "Imóvel não encontrado"}, 404
+
+    imovel = {
+        "id": resultado[0],
+        "logradouro": resultado[1],
+        "tipo_logradouro": resultado[2],
+        "bairro": resultado[3],
+        "cidade": resultado[4],
+        "cep": resultado[5],
+        "tipo": resultado[6],
+        "valor": resultado[7],
+        "data_aquisicao": resultado[8],
+    }
+
+    cursor.close()
+    conn.close()
+
+    return imovel, 200
 
 @app.route("/imoveis", methods=["POST"])
 def criar_imovel():
