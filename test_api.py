@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from app import app
+from app import app, connect_db
 
 
 @pytest.fixture
@@ -62,3 +62,11 @@ def test_listar_imoveis_sem_conexao(mock_connect_db, client):
     assert response.get_json() == {
         "erro": "Erro ao conectar ao banco de dados"
     }
+
+@patch("app.mysql.connector.connect")
+def test_connect_db_retorna_conexao(mock_mysql_connect):
+    mock_conn = MagicMock()
+    mock_conn.is_connected.return_value = True
+    mock_mysql_connect.return_value = mock_conn
+
+    assert connect_db() is mock_conn
