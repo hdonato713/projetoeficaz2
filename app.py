@@ -56,6 +56,10 @@ def listar_imoveis():
 @app.route("/imoveis", methods=["POST"])
 def criar_imovel():
     dados = request.get_json()
+
+    if not dados or not dados.get("logradouro"):
+        return {"erro": "logradouro é obrigatório"}, 400
+
     conn = connect_db()
 
     if conn is None:
