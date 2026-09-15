@@ -85,13 +85,13 @@ def criar_imovel():
         """,
         (
             dados["logradouro"],
-            dados["tipo_logradouro"],
-            dados["bairro"],
+            dados.get("tipo_logradouro"),
+            dados.get("bairro"),
             dados["cidade"],
-            dados["cep"],
-            dados["tipo"],
-            dados["valor"],
-            dados["data_aquisicao"],
+            dados.get("cep"),
+            dados.get("tipo"),
+            dados.get("valor"),
+            dados.get("data_aquisicao"),
         ),
     )
     conn.commit()
