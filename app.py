@@ -167,3 +167,35 @@ def buscar_imoveis_por_tipo(tipo):
         imoveis.append(imovel)
 
     return {"imoveis": imoveis}, 200
+
+@app.route("/imoveis/cidade/<cidade>", methods=["GET"])
+def buscar_imoveis_por_cidade(cidade):
+    conn = connect_db()
+
+    if conn is None:
+        return {"erro": "Erro ao conectar ao banco de dados"}, 500
+
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT * FROM imoveis WHERE cidade = %s",
+        (cidade,),
+    )
+    resultados = cursor.fetchall()
+
+    imoveis = []
+
+    for resultado in resultados:
+        imovel = {
+            "id": resultado[0],
+            "logradouro": resultado[1],
+            "tipo_logradouro": resultado[2],
+            "bairro": resultado[3],
+            "cidade": resultado[4],
+            "cep": resultado[5],
+            "tipo": resultado[6],
+            "valor": resultado[7],
+            "data_aquisicao": resultado[8],
+        }
+        imoveis.append(imovel)
+
+    return {"imoveis": imoveis}, 200
