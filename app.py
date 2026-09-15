@@ -60,6 +60,9 @@ def criar_imovel():
     if not dados or not dados.get("logradouro"):
         return {"erro": "logradouro é obrigatório"}, 400
 
+    if not dados.get("cidade"):
+        return {"erro": "cidade é obrigatório"}, 400
+
     conn = connect_db()
 
     if conn is None:
