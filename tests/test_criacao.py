@@ -81,3 +81,17 @@ def test_criar_imovel_com_campos_opcionais_ausentes(client):
         None,
         None,
     )
+
+def test_criar_imovel_sem_conexao(client):
+    dados = {
+        "logradouro": "Rua das Flores",
+        "cidade": "São Paulo",
+    }
+
+    with patch("app.connect_db", return_value=None):
+        resposta = client.post("/imoveis", json=dados)
+
+    assert resposta.status_code == 500
+    assert resposta.json == {
+        "erro": "Erro ao conectar ao banco de dados"
+    }
