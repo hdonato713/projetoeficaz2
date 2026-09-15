@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 import mysql.connector
 import os
 from dotenv import load_dotenv
@@ -51,3 +51,44 @@ def listar_imoveis():
         imoveis.append(imovel)
 
     return {"imoveis": imoveis}, 200
+
+
+@app.route("/imoveis", methods=["POST"])
+def criar_imovel():
+    dados = request.get_json()
+    conn = connect_db()
+
+    if conn is None:
+        return {"erro": "Erro ao conectar ao banco de dados"}, 500
+
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        INSERT INTO imoveis (
+            logradouro,
+            tipo_logradouro,
+            bairro,
+            cidade,
+            cep,
+            tipo,
+            valor,
+            data_aquisicao
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """,
+        (
+            dados["logradouro"],
+            dados["tipo_logradouro"],
+            dados["bairro"],
+            dados["cidade"],
+            dados["cep"],
+            dados["tipo"],
+            dados["valor"],
+            dados["data_aquisicao"],
+        ),
+    )
+    conn.commit()
+
+    return {"id": cursor.lastrowid}, 201, {
+        "Location": f"/imoveis/{cursor.lastrowid}"
+    }
