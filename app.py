@@ -17,7 +17,10 @@ def connect_db():
         "ssl_ca": os.getenv("SSL_CA_PATH"),
     }
 
-    return mysql.connector.connect(**config)
+    try:
+        return mysql.connector.connect(**config)
+    except mysql.connector.Error:
+        return None
 
 @app.route("/imoveis", methods=["GET"])
 def listar_imoveis():
