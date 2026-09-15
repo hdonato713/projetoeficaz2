@@ -1,9 +1,10 @@
+import mysql.connector
 from flask import Flask
 
 app = Flask(__name__)
 
 def connect_db():
-    pass
+    return mysql.connector.connect()
 
 @app.route("/imoveis", methods=["GET"])
 def listar_imoveis():
