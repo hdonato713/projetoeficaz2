@@ -51,3 +51,14 @@ def test_listar_imoveis(mock_connect_db, client):
         ]
     }
     mock_cursor.execute.assert_called_once_with("SELECT * FROM imoveis")
+
+@patch("app.connect_db")
+def test_listar_imoveis_sem_conexao(mock_connect_db, client):
+    mock_connect_db.return_value = None
+
+    response = client.get("/imoveis")
+
+    assert response.status_code == 500
+    assert response.get_json() == {
+        "erro": "Erro ao conectar ao banco de dados"
+    }
