@@ -1,4 +1,5 @@
 from unittest.mock import MagicMock, patch
+from mysql.connector import Error
 
 from app import connect_db
 
@@ -42,3 +43,9 @@ def test_connect_db_usa_variaveis_de_ambiente(
         port=1234,
         ssl_ca="ca-teste.pem",
     )
+
+def test_connect_db_retorna_none_quando_ocorre_erro():
+    with patch("app.mysql.connector.connect", side_effect=Error):
+        conexao = connect_db()
+
+    assert conexao is None
