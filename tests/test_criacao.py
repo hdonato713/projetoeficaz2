@@ -38,3 +38,15 @@ def test_criar_imovel_sem_logradouro(client):
     assert resposta.status_code == 400
     assert resposta.json == {"erro": "logradouro é obrigatório"}
     mock_connect_db.assert_not_called()
+
+def test_criar_imovel_sem_cidade(client):
+    dados = {
+        "logradouro": "Rua das Flores",
+    }
+
+    with patch("app.connect_db") as mock_connect_db:
+        resposta = client.post("/imoveis", json=dados)
+
+    assert resposta.status_code == 400
+    assert resposta.json == {"erro": "cidade é obrigatório"}
+    mock_connect_db.assert_not_called()
