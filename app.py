@@ -134,3 +134,48 @@ def criar_imovel():
     return {"id": cursor.lastrowid}, 201, {
         "Location": f"/imoveis/{cursor.lastrowid}"
     }
+
+@app.route("/imoveis/<int:imovel_id>", methods=["PUT"])
+def atualizar_imovel(imovel_id):
+    conn = connect_db()
+
+    if conn is None:
+        return {"erro": "Erro ao conectar ao banco de dados"}, 500
+
+    dados = request.get_json()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        UPDATE imoveis
+        SET logradouro = %s,
+            tipo_logradouro = %s,
+            bairro = %s,
+            cidade = %s,
+            cep = %s,
+            tipo = %s,
+            valor = %s,
+            data_aquisicao = %s
+        WHERE id = %s
+        """,
+        (
+            dados["logradouro"],
+            dados["tipo_logradouro"],
+            dados["bairro"],
+            dados["cidade"],
+            dados["cep"],
+            dados["tipo"],
+            dados["valor"],
+            dados["data_aquisicao"],
+            imovel_id,
+        ),
+    )
+    if cursor.rowcount == 0:
+        cursor.close()
+        conn.close()
+        return {"erro": "Imóvel não encontrado"}, 404
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return dados, 200

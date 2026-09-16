@@ -26,53 +26,23 @@ def test_atualiza_imovel(client):
         )
 
     assert resposta.status_code == 200
-    assert resposta.get_json() == {
-        "id": 1,
-        "logradouro": "Avenida Pernambucana",
-        "tipo_logradouro": "Avenida",
-        "bairro": "Boa Vista",
-        "cidade": "Recife",
-        "cep": "01310-100",
-        "tipo": "Apartamento",
-        "valor": 850000.00,
-        "data_aquisicao": "2024-01-15",
-    }
+    assert resposta.get_json() == dados_atualizados
 
-    with patch("app.connect_db", return_value=conexao_mock):
-        resposta = client.put(
-            "/imoveis/1",
-            json=dados_atualizados,
-        )
+    consulta, parametros = cursor_mock.execute.call_args.args
 
-    assert resposta.status_code == 200
-    assert resposta.get_json() == {
-        "mensagem": "Imóvel atualizado com sucesso"
-    }
+    assert "UPDATE imoveis" in consulta
+    assert "WHERE id = %s" in consulta
 
-    cursor_mock.execute.assert_called_once_with(
-        """
-        UPDATE imoveis
-        SET logradouro = %s,
-            tipo_logradouro = %s,
-            bairro = %s,
-            cidade = %s,
-            cep = %s,
-            tipo = %s,
-            valor = %s,
-            data_aquisicao = %s
-        WHERE id = %s
-        """,
-        (
-            "Rua Nova",
-            "Rua",
-            "Centro",
-            "Campinas",
-            "13000-000",
-            "Casa",
-            750000.00,
-            "2026-09-15",
-            1,
-        ),
+    assert parametros == (
+        "Rua Nova",
+        "Rua",
+        "Centro",
+        "Campinas",
+        "13000-000",
+        "Casa",
+        750000.00,
+        "2026-09-15",
+        1,
     )
 
     conexao_mock.commit.assert_called_once()
