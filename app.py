@@ -179,3 +179,26 @@ def atualizar_imovel(imovel_id):
     conn.close()
 
     return dados, 200
+
+@app.route("/imoveis/<int:imovel_id>", methods=["DELETE"])
+def remover_imovel(imovel_id):
+    conn = connect_db()
+
+    if conn is None:
+        return {"erro": "Erro ao conectar ao banco de dados"}, 500
+    cursor = conn.cursor()
+    cursor.execute(
+        "DELETE FROM imoveis WHERE id = %s",
+        (imovel_id,),
+    )
+
+    if cursor.rowcount == 0:
+        cursor.close()
+        conn.close()
+        return {"erro": "Imóvel não encontrado"}, 404
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return {"mensagem": "Imóvel removido com sucesso"}, 200
