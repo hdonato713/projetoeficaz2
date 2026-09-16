@@ -42,3 +42,24 @@ def test_buscar_imoveis_por_tipo(client):
         "SELECT * FROM imoveis WHERE tipo = %s",
         ("apartamento",),
     )
+
+
+def test_buscar_imoveis_por_tipo_sem_resultados(client):
+    conexao = MagicMock()
+    cursor = MagicMock()
+    conexao.cursor.return_value = cursor
+    cursor.fetchall.return_value = []
+
+    with patch("app.connect_db", return_value=conexao):
+        resposta = client.get("/imoveis/tipo/terreno")
+
+    assert resposta.status_code == 200
+    assert resposta.json == {"imoveis": []}
+
+
+def test_buscar_imoveis_por_tipo_sem_conexao(client):
+    with patch("app.connect_db", return_value=None):
+        resposta = client.get("/imoveis/tipo/apartamento")
+
+    assert resposta.status_code == 500
+    assert resposta.json == {"erro": "Erro ao conectar ao banco de dados"}

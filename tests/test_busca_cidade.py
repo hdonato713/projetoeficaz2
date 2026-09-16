@@ -42,3 +42,24 @@ def test_buscar_imoveis_por_cidade(client):
         "SELECT * FROM imoveis WHERE cidade = %s",
         ("São Paulo",),
     )
+
+
+def test_buscar_imoveis_por_cidade_sem_resultados(client):
+    conexao = MagicMock()
+    cursor = MagicMock()
+    conexao.cursor.return_value = cursor
+    cursor.fetchall.return_value = []
+
+    with patch("app.connect_db", return_value=conexao):
+        resposta = client.get("/imoveis/cidade/Recife")
+
+    assert resposta.status_code == 200
+    assert resposta.json == {"imoveis": []}
+
+
+def test_buscar_imoveis_por_cidade_sem_conexao(client):
+    with patch("app.connect_db", return_value=None):
+        resposta = client.get("/imoveis/cidade/São Paulo")
+
+    assert resposta.status_code == 500
+    assert resposta.json == {"erro": "Erro ao conectar ao banco de dados"}

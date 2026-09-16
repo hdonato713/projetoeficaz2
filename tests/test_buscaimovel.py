@@ -39,3 +39,26 @@ def test_busca_imovel_por_id(client):
         "SELECT * FROM imoveis WHERE id = %s",
         (1,),
     )
+
+
+def test_busca_imovel_por_id_inexistente(client):
+    conexao_mock = MagicMock()
+    cursor_mock = MagicMock()
+    conexao_mock.cursor.return_value = cursor_mock
+    cursor_mock.fetchone.return_value = None
+
+    with patch("app.connect_db", return_value=conexao_mock):
+        resposta = client.get("/imoveis/9999")
+
+    assert resposta.status_code == 404
+    assert resposta.json == {"erro": "Imóvel não encontrado"}
+    cursor_mock.close.assert_called_once()
+    conexao_mock.close.assert_called_once()
+
+
+def test_busca_imovel_por_id_sem_conexao(client):
+    with patch("app.connect_db", return_value=None):
+        resposta = client.get("/imoveis/1")
+
+    assert resposta.status_code == 500
+    assert resposta.json == {"erro": "Erro ao conectar ao banco de dados"}
