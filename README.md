@@ -110,6 +110,25 @@ Exemplo de corpo para criação ou atualização:
 | Imóvel inexistente | 404 |
 | Falha de conexão com o banco | 500 |
 
+## HATEOAS
+
+As respostas de sucesso incluem controles de hipermídia em `_links`. Cada
+controle indica uma ação disponível, a URI do recurso (`href`) e o método HTTP
+necessário (`method`). Por exemplo, um imóvel consultado pode trazer:
+
+```json
+{
+  "id": 1,
+  "logradouro": "Rua das Flores",
+  "_links": {
+    "self": {"href": "/imoveis/1", "method": "GET"},
+    "update": {"href": "/imoveis/1", "method": "PUT"},
+    "delete": {"href": "/imoveis/1", "method": "DELETE"},
+    "collection": {"href": "/imoveis", "method": "GET"}
+  }
+}
+```
+
 ## Desenvolvimento orientado a testes
 
 As funcionalidades foram desenvolvidas seguindo o ciclo: teste que falha, implementação mínima para o teste passar e refactor com todos os testes verdes.

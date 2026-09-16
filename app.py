@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, url_for
 import mysql.connector
 import os
 from dotenv import load_dotenv
@@ -7,6 +7,33 @@ from imoveis import formatar_imovel
 load_dotenv(".cred")
 
 app = Flask(__name__)
+
+
+def links_para_imovel(imovel_id):
+    recurso = url_for("buscar_imovel_por_id", imovel_id=imovel_id)
+    return {
+        "self": {"href": recurso, "method": "GET"},
+        "update": {"href": recurso, "method": "PUT"},
+        "delete": {"href": recurso, "method": "DELETE"},
+        "collection": {
+            "href": url_for("listar_imoveis"),
+            "method": "GET",
+        },
+    }
+
+
+def links_para_filtro(recurso):
+    return {
+        "self": {"href": recurso, "method": "GET"},
+        "collection": {
+            "href": url_for("listar_imoveis"),
+            "method": "GET",
+        },
+        "create": {
+            "href": url_for("listar_imoveis"),
+            "method": "POST",
+        },
+    }
 
 
 def connect_db():
@@ -36,11 +63,22 @@ def listar_imoveis():
     imoveis = []
 
     for resultado in resultados:
-        imoveis.append(formatar_imovel(resultado))
+        imovel = formatar_imovel(resultado)
+        imovel["_links"] = links_para_imovel(imovel["id"])
+        imoveis.append(imovel)
 
     cursor.close()
     conn.close()
-    return {"imoveis": imoveis}, 200
+    return {
+        "imoveis": imoveis,
+        "_links": {
+            "self": {"href": url_for("listar_imoveis"), "method": "GET"},
+            "create": {
+                "href": url_for("listar_imoveis"),
+                "method": "POST",
+            },
+        },
+    }, 200
 
 
 @app.route("/imoveis/<int:imovel_id>", methods=["GET"])
@@ -59,6 +97,7 @@ def buscar_imovel_por_id(imovel_id):
         return {"erro": "Imóvel não encontrado"}, 404
 
     imovel = formatar_imovel(resultado)
+    imovel["_links"] = links_para_imovel(imovel_id)
     cursor.close()
     conn.close()
     return imovel, 200
@@ -98,7 +137,7 @@ def criar_imovel():
     imovel_id = cursor.lastrowid
     cursor.close()
     conn.close()
-    return {"id": imovel_id}, 201, {
+    return {"id": imovel_id, "_links": links_para_imovel(imovel_id)}, 201, {
         "Location": f"/imoveis/{imovel_id}"
     }
 
@@ -149,7 +188,11 @@ def atualizar_imovel(imovel_id):
     conn.commit()
     cursor.close()
     conn.close()
-    return dados, 200
+    return {
+        **dados,
+        "id": imovel_id,
+        "_links": links_para_imovel(imovel_id),
+    }, 200
 
 
 @app.route("/imoveis/<int:imovel_id>", methods=["DELETE"])
@@ -168,7 +211,19 @@ def remover_imovel(imovel_id):
     conn.commit()
     cursor.close()
     conn.close()
-    return {"mensagem": "Imóvel removido com sucesso"}, 200
+    return {
+        "mensagem": "Imóvel removido com sucesso",
+        "_links": {
+            "collection": {
+                "href": url_for("listar_imoveis"),
+                "method": "GET",
+            },
+            "create": {
+                "href": url_for("listar_imoveis"),
+                "method": "POST",
+            },
+        },
+    }, 200
 
 
 @app.route("/imoveis/tipo/<tipo>", methods=["GET"])
@@ -183,11 +238,18 @@ def buscar_imoveis_por_tipo(tipo):
     imoveis = []
 
     for resultado in resultados:
-        imoveis.append(formatar_imovel(resultado))
+        imovel = formatar_imovel(resultado)
+        imovel["_links"] = links_para_imovel(imovel["id"])
+        imoveis.append(imovel)
 
     cursor.close()
     conn.close()
-    return {"imoveis": imoveis}, 200
+    return {
+        "imoveis": imoveis,
+        "_links": links_para_filtro(
+            url_for("buscar_imoveis_por_tipo", tipo=tipo)
+        ),
+    }, 200
 
 
 @app.route("/imoveis/cidade/<cidade>", methods=["GET"])
@@ -202,8 +264,15 @@ def buscar_imoveis_por_cidade(cidade):
     imoveis = []
 
     for resultado in resultados:
-        imoveis.append(formatar_imovel(resultado))
+        imovel = formatar_imovel(resultado)
+        imovel["_links"] = links_para_imovel(imovel["id"])
+        imoveis.append(imovel)
 
     cursor.close()
     conn.close()
-    return {"imoveis": imoveis}, 200
+    return {
+        "imoveis": imoveis,
+        "_links": links_para_filtro(
+            url_for("buscar_imoveis_por_cidade", cidade=cidade)
+        ),
+    }, 200
