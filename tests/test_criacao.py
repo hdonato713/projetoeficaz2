@@ -23,7 +23,15 @@ def test_criar_imovel(client):
         resposta = client.post("/imoveis", json=dados)
 
     assert resposta.status_code == 201
-    assert resposta.json == {"id": 1001}
+    assert resposta.json == {
+        "id": 1001,
+        "_links": {
+            "self": {"href": "/imoveis/1001", "method": "GET"},
+            "update": {"href": "/imoveis/1001", "method": "PUT"},
+            "delete": {"href": "/imoveis/1001", "method": "DELETE"},
+            "collection": {"href": "/imoveis", "method": "GET"},
+        },
+    }
     assert resposta.headers["Location"] == "/imoveis/1001"
     conexao.commit.assert_called_once()
 
@@ -67,7 +75,15 @@ def test_criar_imovel_com_campos_opcionais_ausentes(client):
         resposta = client.post("/imoveis", json=dados)
 
     assert resposta.status_code == 201
-    assert resposta.json == {"id": 1002}
+    assert resposta.json == {
+        "id": 1002,
+        "_links": {
+            "self": {"href": "/imoveis/1002", "method": "GET"},
+            "update": {"href": "/imoveis/1002", "method": "PUT"},
+            "delete": {"href": "/imoveis/1002", "method": "DELETE"},
+            "collection": {"href": "/imoveis", "method": "GET"},
+        },
+    }
     assert resposta.headers["Location"] == "/imoveis/1002"
 
     _, valores = cursor.execute.call_args.args

@@ -35,8 +35,22 @@ def test_buscar_imoveis_por_cidade(client):
                 "tipo": "apartamento",
                 "valor": 750000.0,
                 "data_aquisicao": "2024-01-15",
+                "_links": {
+                    "self": {"href": "/imoveis/1", "method": "GET"},
+                    "update": {"href": "/imoveis/1", "method": "PUT"},
+                    "delete": {"href": "/imoveis/1", "method": "DELETE"},
+                    "collection": {"href": "/imoveis", "method": "GET"},
+                },
             }
-        ]
+        ],
+        "_links": {
+            "self": {
+                "href": "/imoveis/cidade/S%C3%A3o%20Paulo",
+                "method": "GET",
+            },
+            "collection": {"href": "/imoveis", "method": "GET"},
+            "create": {"href": "/imoveis", "method": "POST"},
+        },
     }
     cursor.execute.assert_called_once_with(
         "SELECT * FROM imoveis WHERE cidade = %s",
@@ -54,7 +68,14 @@ def test_buscar_imoveis_por_cidade_sem_resultados(client):
         resposta = client.get("/imoveis/cidade/Recife")
 
     assert resposta.status_code == 200
-    assert resposta.json == {"imoveis": []}
+    assert resposta.json == {
+        "imoveis": [],
+        "_links": {
+            "self": {"href": "/imoveis/cidade/Recife", "method": "GET"},
+            "collection": {"href": "/imoveis", "method": "GET"},
+            "create": {"href": "/imoveis", "method": "POST"},
+        },
+    }
 
 
 def test_buscar_imoveis_por_cidade_sem_conexao(client):

@@ -26,7 +26,16 @@ def test_atualiza_imovel(client):
         )
 
     assert resposta.status_code == 200
-    assert resposta.get_json() == dados_atualizados
+    assert resposta.get_json() == {
+        **dados_atualizados,
+        "id": 1,
+        "_links": {
+            "self": {"href": "/imoveis/1", "method": "GET"},
+            "update": {"href": "/imoveis/1", "method": "PUT"},
+            "delete": {"href": "/imoveis/1", "method": "DELETE"},
+            "collection": {"href": "/imoveis", "method": "GET"},
+        },
+    }
 
     consulta, parametros = cursor_mock.execute.call_args.args
 
@@ -82,7 +91,16 @@ def test_atualizar_imovel_com_campos_opcionais_ausentes(client):
         resposta = client.put("/imoveis/1", json=dados)
 
     assert resposta.status_code == 200
-    assert resposta.json == dados
+    assert resposta.json == {
+        **dados,
+        "id": 1,
+        "_links": {
+            "self": {"href": "/imoveis/1", "method": "GET"},
+            "update": {"href": "/imoveis/1", "method": "PUT"},
+            "delete": {"href": "/imoveis/1", "method": "DELETE"},
+            "collection": {"href": "/imoveis", "method": "GET"},
+        },
+    }
     assert cursor_mock.execute.call_args.args[1] == (
         "Rua Nova",
         None,

@@ -33,6 +33,12 @@ def test_busca_imovel_por_id(client):
         "tipo": "Apartamento",
         "valor": 850000.00,
         "data_aquisicao": "2024-01-15",
+        "_links": {
+            "self": {"href": "/imoveis/1", "method": "GET"},
+            "update": {"href": "/imoveis/1", "method": "PUT"},
+            "delete": {"href": "/imoveis/1", "method": "DELETE"},
+            "collection": {"href": "/imoveis", "method": "GET"},
+        },
     }
 
     cursor_mock.execute.assert_called_once_with(

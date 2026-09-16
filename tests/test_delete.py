@@ -13,7 +13,11 @@ def test_remove_imovel(client):
 
     assert resposta.status_code == 200
     assert resposta.get_json() == {
-        "mensagem": "Imóvel removido com sucesso"
+        "mensagem": "Imóvel removido com sucesso",
+        "_links": {
+            "collection": {"href": "/imoveis", "method": "GET"},
+            "create": {"href": "/imoveis", "method": "POST"},
+        },
     }
 
     cursor_mock.execute.assert_called_once_with(

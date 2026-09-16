@@ -36,8 +36,18 @@ def test_listar_imoveis(mock_connect_db, client):
                 "tipo": "apartamento",
                 "valor": 750000.0,
                 "data_aquisicao": "2024-01-15",
+                "_links": {
+                    "self": {"href": "/imoveis/1", "method": "GET"},
+                    "update": {"href": "/imoveis/1", "method": "PUT"},
+                    "delete": {"href": "/imoveis/1", "method": "DELETE"},
+                    "collection": {"href": "/imoveis", "method": "GET"},
+                },
             }
-        ]
+        ],
+        "_links": {
+            "self": {"href": "/imoveis", "method": "GET"},
+            "create": {"href": "/imoveis", "method": "POST"},
+        },
     }
     mock_cursor.execute.assert_called_once_with("SELECT * FROM imoveis")
 
