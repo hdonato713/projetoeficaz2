@@ -2,6 +2,7 @@ from flask import Flask, request
 import mysql.connector
 import os
 from dotenv import load_dotenv
+from imoveis import formatar_imovel
 
 load_dotenv(".cred")
 
@@ -35,19 +36,10 @@ def listar_imoveis():
     imoveis = []
 
     for resultado in resultados:
-        imovel = {
-            "id": resultado[0],
-            "logradouro": resultado[1],
-            "tipo_logradouro": resultado[2],
-            "bairro": resultado[3],
-            "cidade": resultado[4],
-            "cep": resultado[5],
-            "tipo": resultado[6],
-            "valor": resultado[7],
-            "data_aquisicao": resultado[8],
-        }
-        imoveis.append(imovel)
+        imoveis.append(formatar_imovel(resultado))
 
+    cursor.close()
+    conn.close()
     return {"imoveis": imoveis}, 200
 
 
@@ -66,17 +58,7 @@ def buscar_imovel_por_id(imovel_id):
         conn.close()
         return {"erro": "Imóvel não encontrado"}, 404
 
-    imovel = {
-        "id": resultado[0],
-        "logradouro": resultado[1],
-        "tipo_logradouro": resultado[2],
-        "bairro": resultado[3],
-        "cidade": resultado[4],
-        "cep": resultado[5],
-        "tipo": resultado[6],
-        "valor": resultado[7],
-        "data_aquisicao": resultado[8],
-    }
+    imovel = formatar_imovel(resultado)
     cursor.close()
     conn.close()
     return imovel, 200
@@ -113,18 +95,26 @@ def criar_imovel():
         ),
     )
     conn.commit()
-    return {"id": cursor.lastrowid}, 201, {
-        "Location": f"/imoveis/{cursor.lastrowid}"
+    imovel_id = cursor.lastrowid
+    cursor.close()
+    conn.close()
+    return {"id": imovel_id}, 201, {
+        "Location": f"/imoveis/{imovel_id}"
     }
 
 
 @app.route("/imoveis/<int:imovel_id>", methods=["PUT"])
 def atualizar_imovel(imovel_id):
+    dados = request.get_json()
+    if not dados or not dados.get("logradouro"):
+        return {"erro": "logradouro é obrigatório"}, 400
+    if not dados.get("cidade"):
+        return {"erro": "cidade é obrigatório"}, 400
+
     conn = connect_db()
     if conn is None:
         return {"erro": "Erro ao conectar ao banco de dados"}, 500
 
-    dados = request.get_json()
     cursor = conn.cursor()
     cursor.execute(
         """
@@ -141,13 +131,13 @@ def atualizar_imovel(imovel_id):
         """,
         (
             dados["logradouro"],
-            dados["tipo_logradouro"],
-            dados["bairro"],
+            dados.get("tipo_logradouro"),
+            dados.get("bairro"),
             dados["cidade"],
-            dados["cep"],
-            dados["tipo"],
-            dados["valor"],
-            dados["data_aquisicao"],
+            dados.get("cep"),
+            dados.get("tipo"),
+            dados.get("valor"),
+            dados.get("data_aquisicao"),
             imovel_id,
         ),
     )
@@ -193,19 +183,10 @@ def buscar_imoveis_por_tipo(tipo):
     imoveis = []
 
     for resultado in resultados:
-        imovel = {
-            "id": resultado[0],
-            "logradouro": resultado[1],
-            "tipo_logradouro": resultado[2],
-            "bairro": resultado[3],
-            "cidade": resultado[4],
-            "cep": resultado[5],
-            "tipo": resultado[6],
-            "valor": resultado[7],
-            "data_aquisicao": resultado[8],
-        }
-        imoveis.append(imovel)
+        imoveis.append(formatar_imovel(resultado))
 
+    cursor.close()
+    conn.close()
     return {"imoveis": imoveis}, 200
 
 
@@ -221,17 +202,8 @@ def buscar_imoveis_por_cidade(cidade):
     imoveis = []
 
     for resultado in resultados:
-        imovel = {
-            "id": resultado[0],
-            "logradouro": resultado[1],
-            "tipo_logradouro": resultado[2],
-            "bairro": resultado[3],
-            "cidade": resultado[4],
-            "cep": resultado[5],
-            "tipo": resultado[6],
-            "valor": resultado[7],
-            "data_aquisicao": resultado[8],
-        }
-        imoveis.append(imovel)
+        imoveis.append(formatar_imovel(resultado))
 
+    cursor.close()
+    conn.close()
     return {"imoveis": imoveis}, 200
