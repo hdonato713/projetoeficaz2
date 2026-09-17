@@ -135,4 +135,6 @@ As funcionalidades foram desenvolvidas seguindo o ciclo: teste que falha, implem
 
 ## Deploy
 
-A URL pública da API será adicionada após o deploy no AWS EC2.
+A API está publicada em uma instância EC2 da AWS:
+
+http://100.48.93.240/imoveis
